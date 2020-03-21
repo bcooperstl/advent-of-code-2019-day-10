@@ -186,6 +186,21 @@ void processMapWithSource(asteroid_map * map, int srcX, int srcY) // x is column
     print_map(map);
 }
 
+void resetToAsteroids(asteroid_map * map, int srcX, int srcY) // x is column, y is row
+{
+    map->map[srcY][srcX] = SOURCE;
+    for (int i=0; i<map->rows; i++)
+    {
+        for (int j=0; j<map->cols; j++)
+        {
+            if (is_blocked(map, j, i))
+            {
+                map->map[i][j]=ASTEROID_LOC;
+            }
+        }
+    }
+}
+
 int count_visible(asteroid_map * map)
 {
     int count=0;
@@ -199,6 +214,74 @@ int count_visible(asteroid_map * map)
     }
     return count;
 }
+
+int getLocation(int srcX, int srcY, int x, int y)
+{
+    if (srcY==y) // on a horizaontal line
+    {
+        if(x>srcX) // point is right of source
+            return DIRECTION_E;
+        else // point is left of source
+            return DIRECTION_W;
+    }
+    if (srcX==x) // on a vertical line
+    {
+        if (y>srcY) // point is below source
+            return DIRECTION_S;
+        else // point is above source
+            return DIRECTION_N;
+    }
+    if (y<srcY)
+    {
+        // above source; either NW or NE
+        if (x < srcX)
+        {
+            // to the left of source; NW
+            return DIRECTION_NW;
+        }
+        else
+        {
+            // to the right of source; NE
+            return DIRECTION_NE;
+        }
+    }
+    else
+    {
+        // below source; either SW or SE
+        if (x < srcX)
+        {
+            // to the left of source; SW
+            return DIRECTION_SW;
+        }
+        else
+        {
+            // to the right of source; SE
+            return DIRECTION_SE;
+        }
+    }
+}
+
+int compare(int srcX, int srcY, int x1, int y1, int x2, int y2)
+{
+    int loc1 = getLocation(srcX, srcY, x1, y1);
+    int loc2 = getLocation(srcX, srcY, x2, y2);
+    
+    if (loc1 < loc2)
+    {
+        return -1;
+    }
+    else if (loc2 < loc1)
+    {
+        return 1;
+    }
+    
+    // TODO: compare slopes
+    switch (loc1)
+    {
+      
+    
+}
+
 
 /*
 
