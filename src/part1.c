@@ -19,7 +19,7 @@ int main (int argc, char * argv[])
     memset(baseMap, '\0', sizeof(asteroid_map));
     
     asteroid_map * bestMap = NULL;
-    int bestNumVisible=0;
+    int bestNumVisible=0, bestX, bestY;
     
     if (argc != 2)
     {
@@ -77,13 +77,15 @@ int main (int argc, char * argv[])
                         delete_map(bestMap);
                     bestMap=copy_map(workingMap);
                     bestNumVisible=count;
+                    bestX=j;
+                    bestY=i;
                 }
                 delete_map(workingMap);
             }
         }
     }
     
-    printf("***The best map has %d visible\n", bestNumVisible);
+    printf("***The best map has %d visible with source %d,%d\n", bestNumVisible, bestX, bestY);
     print_map(bestMap);
     delete_map(bestMap);
     

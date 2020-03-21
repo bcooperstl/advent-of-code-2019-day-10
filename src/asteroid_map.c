@@ -82,6 +82,63 @@ int is_source(asteroid_map * map, int x, int y) // x is column, y is row
     return map->map[y][x]==SOURCE;
 }
 
+int gcd(int a, int b)
+{
+    int temp;
+    while (b != 0)
+    {
+        temp = a % b;
+
+        a = b;
+        b = temp;
+    }
+    return a;
+}
+
+void reduceDeltas(int * deltaX, int * deltaY)
+{
+    int xSign=1;
+    int xValue=*deltaX;
+    int ySign=1;
+    int yValue=*deltaY;
+    
+    if (*deltaX < 0)
+    {
+        xSign=-1;
+        xValue=-1*xValue;
+    }
+    if (*deltaY < 0)
+    {
+        ySign=-1;
+        yValue=-1*yValue;
+    }
+    
+    // special cases
+    if (xValue==0 && yValue==0)
+    {
+        // do nothing
+    }
+    else if (xValue==0)
+    {
+        *deltaY=ySign;
+    }
+    else if (yValue==0)
+    {
+        *deltaX=xSign;
+    }
+    else if (xValue==yValue)
+    {
+        *deltaX=xSign;
+        *deltaY=ySign;
+    }
+    else
+    {
+        int gcdValue=gcd(xValue, yValue);
+        *deltaX=xSign*(xValue/gcdValue);
+        *deltaY=ySign*(yValue/gcdValue);
+    }
+}
+
 void mapBlockedBySource(asteroid_map * map, int srcX, int srcY, int astX, int astY) // x is for column, y is for row
 {
     printf("Mapping blocked asteroids for source %d,%d asteroid %d,%d\n", srcX, srcY, astX, astY);
@@ -90,6 +147,8 @@ void mapBlockedBySource(asteroid_map * map, int srcX, int srcY, int astX, int as
     int deltaY=astY-srcY;
     
     printf("  DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
+    reduceDeltas(&deltaX, &deltaY);
+    printf("  After reduction, DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
     
     int nextX=astX+deltaX;
     int nextY=astY+deltaY;
