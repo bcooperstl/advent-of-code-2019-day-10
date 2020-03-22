@@ -30,6 +30,7 @@ void delete_map(asteroid_map * map);
 void add_row(asteroid_map * map, int cols, char * row);
 void print_map(asteroid_map * map);
 int count_visible(asteroid_map * map);
+int count_asteroids(asteroid_map * map);
 
 void reduceDeltas(int * deltaX, int * deltaY);
 
@@ -46,5 +47,7 @@ int gcd(int a, int b);
 
 int getLocation(int srcX, int srcY, int x, int y);
 int compare(int srcX, int srcY, int x1, int y1, int x2, int y2);
+
+void find_next_visible(asteroid_map * map, int srcX, int srcY, int * nextX, int * nextY);
 
 #endif

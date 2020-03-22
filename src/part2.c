@@ -87,6 +87,25 @@ int main (int argc, char * argv[])
     
     printf("***The best map has %d visible with source %d,%d\n", bestNumVisible, bestX, bestY);
     print_map(bestMap);
+    
+    int vaporized=1;
+    int vapX, vapY;
+    
+    while (count_visible(bestMap)>0)
+    {
+        while (count_visible(bestMap) > 0)
+        {
+            find_next_visible(bestMap, bestX, bestY, &vapX, &vapY);
+            printf("Vaporizing #%d is at %d,%d\n", vaporized++, vapX, vapY);
+            bestMap->map[vapY][vapX]=VAPORIZED;
+        }
+        printf("Resetting to asteroids and marking visible\n");
+        resetToAsteroids(bestMap, bestX, bestY);
+        printf("Setting visible asteroids\n");
+        processMapWithSource(bestMap, bestX, bestY);
+    }
+    
+    
     delete_map(bestMap);
     
     delete_map(baseMap);

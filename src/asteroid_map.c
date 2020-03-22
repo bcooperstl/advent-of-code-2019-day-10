@@ -141,31 +141,31 @@ void reduceDeltas(int * deltaX, int * deltaY)
 
 void mapBlockedBySource(asteroid_map * map, int srcX, int srcY, int astX, int astY) // x is for column, y is for row
 {
-    printf("Mapping blocked asteroids for source %d,%d asteroid %d,%d\n", srcX, srcY, astX, astY);
+    //printf("Mapping blocked asteroids for source %d,%d asteroid %d,%d\n", srcX, srcY, astX, astY);
     
     int deltaX=astX-srcX;
     int deltaY=astY-srcY;
     
-    printf("  DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
+    //printf("  DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
     reduceDeltas(&deltaX, &deltaY);
-    printf("  After reduction, DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
+    //printf("  After reduction, DeltaX=%d, DeltaY=%d\n", deltaX, deltaY);
     
     int nextX=astX+deltaX;
     int nextY=astY+deltaY;
     
-    printf("  NextX=%d, NextY=%d\n", nextX, nextY);
+    //printf("  NextX=%d, NextY=%d\n", nextX, nextY);
     
     while ((nextX >= 0 && nextX < map->cols) && (nextY >=0 && nextY < map->rows))
     {
         if (is_asteroid(map,nextX,nextY) || is_visible(map,nextX,nextY))
         {
-            printf("    Marking as BLOCKED\n");
+            //printf("    Marking as BLOCKED\n");
             map->map[nextY][nextX]=BLOCKED;
         }
         
         nextX+=deltaX;
         nextY+=deltaY;
-        printf("  NextX=%d, NextY=%d\n", nextX, nextY);
+        //printf("  NextX=%d, NextY=%d\n", nextX, nextY);
     }
 }
 
@@ -209,6 +209,20 @@ int count_visible(asteroid_map * map)
         for (int j=0; j<map->cols; j++)
         {
             if (is_visible(map, j, i))
+                count++;
+        }
+    }
+    return count;
+}
+
+int count_asteroids(asteroid_map * map)
+{
+    int count=0;
+    for (int i=0; i<map->rows; i++)
+    {
+        for (int j=0; j<map->cols; j++)
+        {
+            if (is_asteroid(map, j, i))
                 count++;
         }
     }
@@ -261,6 +275,7 @@ int getLocation(int srcX, int srcY, int x, int y)
     }
 }
 
+// returns -1 for x1,y1 should be reached first or 1 for x2,y2 should be reached first
 int compare(int srcX, int srcY, int x1, int y1, int x2, int y2)
 {
     int loc1 = getLocation(srcX, srcY, x1, y1);
@@ -275,12 +290,59 @@ int compare(int srcX, int srcY, int x1, int y1, int x2, int y2)
         return 1;
     }
     
-    // TODO: compare slopes
+    // flip the y's because the coordinate systen is backwards for y-values
+    double slope1=((double)(srcY-y1))/((double)(x1-srcX));
+    double slope2=((double)(srcY-y2))/((double)(x2-srcX));
+    
     switch (loc1)
     {
-      
-    
+        case DIRECTION_NE:
+            // both slopes are positive. Larger slope (2 vs 1/2) is reached first
+            return slope1>slope2 ? -1 : 1;
+        case DIRECTION_SE:
+            // both slopes are negative. Larger slope (-1/2 vs -2) is reached first
+            return slope1>slope2 ? -1 : 1;
+        case DIRECTION_SW:
+            // both slopes are positive. Larger slope (2 vs 1/2) is reached first
+            return slope1>slope2 ? -1 : 1;
+        case DIRECTION_NW:
+            // both slopes are negative. Larger slope (-1/2 vs -2) is reached first
+            return slope1>slope2 ? -1 : 1;
+    }
+    fprintf(stderr, "***Messed something up...src %d,%d, two points %d,%d and %d,%d did not match a case\n", srcX, srcY, x1, y1, x2, y2);
+    return 0;
 }
+
+void find_next_visible(asteroid_map * map, int srcX, int srcY, int * nextX, int * nextY)
+{
+    int first=1;
+    
+    for (int i=0; i<map->rows; i++)
+    {
+        for (int j=0; j<map->cols; j++)
+        {
+            if (is_visible(map, j, i))
+            {
+                if (first==1)
+                {
+                    *nextX=j;
+                    *nextY=i;
+                    first=0;
+                }
+                else
+                {
+                    if(compare(srcX, srcY, *nextX, *nextY, j, i) == 1)
+                    {
+                        // this asteroid will be found before the current best one
+                        *nextX=j;
+                        *nextY=i;
+                    }
+                }
+            }
+        }
+    }    
+}
+
 
 
 /*
